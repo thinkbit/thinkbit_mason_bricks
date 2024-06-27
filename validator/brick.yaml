@@ -1,0 +1,17 @@
+name: validator
+description: A new brick for Validator by Cedrick Pablo
+
+#Version
+version: 0.1.0+1
+
+#Environment
+environment:
+  mason: ">=0.1.0-dev.57 <0.1.0"
+# TODO: Add vars if needed
+#Variable
+# vars:
+#   name:
+#     type: string
+#     description: Your name
+#     default: Dash
+#     prompt: What is your name?
