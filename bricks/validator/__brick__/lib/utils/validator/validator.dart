@@ -117,7 +117,7 @@ class Validator {
   ///
   static String? validate({String? text, List<String>? rules}) {
     for (final rule in rules!) {
-      var error;
+      dynamic error;
       final ruleComponents = rule.split(':');
 
       if (ruleComponents.length == defaultOne) {
