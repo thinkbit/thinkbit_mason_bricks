@@ -1,0 +1,15 @@
+name: bloc_feature
+description: A customize brick for a new feature using bloc
+version: 0.1.0+1
+
+# The following defines the environment for the current brick.
+# It includes the version of mason that the brick requires.
+environment:
+  mason: ">=0.1.0-dev.57 <0.1.0"
+
+# Variables specify dynamic values that your brick depends on.
+vars:
+  feature_name:
+    type: string
+    description: Name of the feature
+    prompt: What is the name of your feature?
