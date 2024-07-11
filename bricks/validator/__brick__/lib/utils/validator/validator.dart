@@ -1,7 +1,7 @@
 part 'validator_constant.dart';
 
 /// A class for validating text input based on set of predefined rules
-///
+/// [version 0.1.2]
 class Validator {
   /// A map of validation [_rules] for validating [text] inputs.
   ///
