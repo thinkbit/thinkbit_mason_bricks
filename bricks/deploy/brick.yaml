@@ -30,9 +30,18 @@ vars:
     description: Staging Package Name
     default: com.example.staging
   # Firebase Project Ids
-  # type: string
-  # name: development_firebase_project_id
-  # default: development-project-id
+  development_firebase_project_id: 
+    type: string
+    description: Development Firebase Project Id
+    default: development-project-id
+  production_firebase_project_id: 
+    type: string
+    description: Production Firebase Project Id
+    default: production-project-id
+  staging_firebase_project_id: 
+      type: string
+      description: Staging Firebase Project Id
+      default: staging-project-id
   # type: string
   # name: development_android_app_id
   # default: 1:1234567890:android:abcdef123456
@@ -40,17 +49,11 @@ vars:
   # name: development_ios_app_id
   # default: 1:1234567890:ios:abcdef123456
   # type: string
-  # name: production_firebase_project_id
-  # default: production-project-id
-  # type: string
   # name: production_android_app_id
   # default: 1:1234567890:android:abcdef123456
   # type: string
   # name: production_ios_app_id
   # default: 1:1234567890:ios:abcdef123456
-  # type: string
-  # name: staging_firebase_project_id
-  # default: staging-project-id
   # type: string
   # name: staging_android_app_id
   # default: 1:1234567890:android:abcdef123456
