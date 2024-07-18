@@ -16,28 +16,27 @@ environment:
   mason: ">=0.1.0-dev.57 <0.1.0"
 
 vars:
-    - name: development_package_name
-      default: com.example.development
-    - name: development_firebase_project_id
-      default: development-project-id
-    - name: development_android_app_id
-      default: 1:1234567890:android:abcdef123456
-    - name: development_ios_app_id
-      default: 1:1234567890:ios:abcdef123456
-    - name: production_package_name
-      default: com.example.production
-    - name: production_firebase_project_id
-      default: production-project-id
-    - name: production_android_app_id
-      default: 1:1234567890:android:abcdef123456
-    - name: production_ios_app_id
-      default: 1:1234567890:ios:abcdef123456
-    - name: staging_package_name
-      default: com.example.staging
-    - name: staging_firebase_project_id
-      default: staging-project-id
-    - name: staging_android_app_id
-      default: 1:1234567890:android:abcdef123456
-    - name: staging_ios_app_id
-      default: 1:1234567890:ios:abcdef123456
-  
+  - name: development_package_name
+    default: com.example.development
+  - name: development_firebase_project_id
+    default: development-project-id
+  - name: development_android_app_id
+    default: 1:1234567890:android:abcdef123456
+  - name: development_ios_app_id
+    default: 1:1234567890:ios:abcdef123456
+  - name: production_package_name
+    default: com.example.production
+  - name: production_firebase_project_id
+    default: production-project-id
+  - name: production_android_app_id
+    default: 1:1234567890:android:abcdef123456
+  - name: production_ios_app_id
+    default: 1:1234567890:ios:abcdef123456
+  - name: staging_package_name
+    default: com.example.staging
+  - name: staging_firebase_project_id
+    default: staging-project-id
+  - name: staging_android_app_id
+    default: 1:1234567890:android:abcdef123456
+  - name: staging_ios_app_id
+    default: 1:1234567890:ios:abcdef123456
