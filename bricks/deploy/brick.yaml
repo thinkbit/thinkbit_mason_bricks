@@ -1,5 +1,5 @@
-name: deploy_configs
-description: A brick to generate .deploy-configs file
+name: deploy
+description: A brick to generate .deploy-configs file and deploy.sh
 
 # The following defines the brick repository url.
 # Uncomment and update the following line before publishing the brick.
