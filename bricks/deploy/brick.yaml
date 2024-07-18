@@ -16,10 +16,20 @@ environment:
   mason: ">=0.1.0-dev.57 <0.1.0"
 
 vars:
+  # Package Names
   development_package_name: 
     type: string
     description: Deployment Package Name
     default: com.example.development
+  production_package_name: 
+      type: string
+      description: Production Package Name
+      default: com.example.production
+  staging_package_name: 
+    type: string
+    description: Staging Package Name
+    default: com.example.staging
+  # Firebase Project Ids
   # type: string
   # name: development_firebase_project_id
   # default: development-project-id
@@ -30,9 +40,6 @@ vars:
   # name: development_ios_app_id
   # default: 1:1234567890:ios:abcdef123456
   # type: string
-  # name: production_package_name
-  # default: com.example.production
-  # type: string
   # name: production_firebase_project_id
   # default: production-project-id
   # type: string
@@ -41,9 +48,6 @@ vars:
   # type: string
   # name: production_ios_app_id
   # default: 1:1234567890:ios:abcdef123456
-  # type: string
-  # name: staging_package_name
-  # default: com.example.staging
   # type: string
   # name: staging_firebase_project_id
   # default: staging-project-id
