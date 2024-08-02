@@ -177,7 +177,7 @@ case $PLATFORM in
     echo -e "${GREEN}Deleting existing GoogleService-Info.plist${NC}"
     rm -f ios/Runner/GoogleService-Info.plist
     configure_flutterfire $FIREBASE_PROJECT_ID $PACKAGE_NAME
-    if ! flutter build ipa --release -t $TARGET --flavor $FLAVOR; then
+    if ! flutter build ipa --release -t $TARGET --flavor $FLAVOR --export-method=development; then
         echo -e "${RED}Flutter build for iOS failed.${NC}"
 
         read -p "Press any key to continue..."
@@ -202,7 +202,7 @@ case $PLATFORM in
         read -p "Press any key to continue..."
         exit 1
     fi
-    if ! flutter build ipa --release -t $TARGET --flavor $FLAVOR; then
+    if ! flutter build ipa --release -t $TARGET --flavor $FLAVOR --export-method=development; then
         echo -e "${RED}Flutter build for iOS failed.${NC}"
 
         read -p "Press any key to continue..."
