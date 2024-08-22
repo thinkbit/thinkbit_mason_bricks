@@ -3,11 +3,8 @@ import 'dart:io';
 import 'package:mason/mason.dart';
 
 Future<void> run(HookContext context) async {
-  final progress = context.logger.progress('Installing Packages');
-
-  await Process.run('bash', ['-c', 'flutter pub add auto_route']);
-  await Process.run('bash', ['-c', 'flutter pub get']);
+  final progress = context.logger.progress('Running post_gen...');
 
   progress.complete();
-  context.logger.success('Done instaling packages!');
+  context.logger.success('Done post_gen!');
 }
