@@ -7,7 +7,7 @@ void run(HookContext context) async {
 
   await Process.run(
     'flutter',
-    ['pub', 'add', 'auto_route'],
+    ['pub', 'add', 'auto_route', 'flutter_secure_storage'],
     runInShell: true,
   );
 
