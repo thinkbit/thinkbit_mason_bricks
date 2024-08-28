@@ -7,7 +7,7 @@ Future<void> run(HookContext context) async {
 
   await Process.run(
     'flutter',
-    ['pub', 'add', 'dio', 'retry'],
+    ['pub', 'add', 'dio', 'retry', 'requests_inspector'],
     runInShell: true,
   );
 
