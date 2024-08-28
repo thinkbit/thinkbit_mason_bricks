@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:requests_inspector/requests_inspector.dart';
 import 'package:retry/retry.dart';
 
 class Api {
@@ -37,6 +38,8 @@ class Api {
         }
       },
     ),
+  )..interceptors.add(
+      RequestsInspectorInterceptor()
   );
 
   static Future<Map<String, String>> headers({required bool authorized}) async {
