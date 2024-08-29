@@ -1,8 +1,6 @@
-# 
+# auto_route
 
 [![Powered by Mason](https://img.shields.io/endpoint?url=https%3A%2F%2Ftinyurl.com%2Fmason-badge)](https://github.com/felangel/mason)
-
-## auto_route
 
 A brick created with the Mason CLI to generate boilerplate codes for using [auto_route][8] package. This brick generates `app_router.dart`, `app_route_observer.dart`, `nested_route_container.dart` and `auth_guard.dart` files.
 
