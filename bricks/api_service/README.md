@@ -1,8 +1,6 @@
-# 
+# api_service
 
 [![Powered by Mason](https://img.shields.io/endpoint?url=https%3A%2F%2Ftinyurl.com%2Fmason-badge)](https://github.com/felangel/mason)
-
-## api_service
 
 A brick created with the Mason CLI to generate api.dart file that can be used as api service of the app. Uses [dio][8] for http requests and integrated with [retry][9] for automatic request retries and [requests_inspector][10] to show the list of requests and responses made by the app by long pressing the empty space of the app or by shaking the device.
 
