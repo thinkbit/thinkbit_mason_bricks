@@ -6,7 +6,7 @@ version: 0.1.2
 
 #Environment
 environment:
-  mason: ">=0.1.0-dev.57 <0.1.0"
+  mason: ^0.1.0
 # TODO: Add vars if needed
 #Variable
 # vars:
