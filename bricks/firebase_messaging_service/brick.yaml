@@ -1,0 +1,17 @@
+name: firebase_messaging_service
+description: A brick that generates Firebase Cloud Messaging events/functions.
+
+# Version
+version: 1.0.0
+
+# Environment
+environment:
+  mason: ">=0.1.0-dev.60 <0.1.0"
+
+# No vars needed at the moment
+# vars:
+#   name:
+#     type: string
+#     description: Your name
+#     default: Dash
+#     prompt: What is your name?
