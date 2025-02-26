@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:requests_inspector/requests_inspector.dart';
 import 'package:retry/retry.dart';
+import 'api_response.dart';
 
 class Api {
   // static String baseUrl = FlavorConfig.instance!.values.baseUrl;
@@ -88,7 +89,7 @@ class Api {
     return e is SocketException || e is TimeoutException;
   }
 
-  static Future<Response> get(
+  static Future<APIResponse> get(
     String path, {
     Map<String, dynamic>? params,
     bool authorized = true,
@@ -117,7 +118,7 @@ class Api {
 
       debugPrint('get: $path\nstatus: ${response.statusCode}\nres: $response');
 
-      return response;
+      return APIResponse(response: response);
     } on DioException catch (e) {
       debugPrint('DioException catch (e.error): ${e.error}');
       debugPrint('DioException catch (e.message): ${e.message}');
@@ -131,7 +132,7 @@ class Api {
     }
   }
 
-  static Future<Response> patch(
+  static Future<APIResponse> patch(
     String path, {
     Map<String, dynamic>? params,
     bool authorized = true,
@@ -159,7 +160,7 @@ class Api {
       debugPrint(
           'patch: $path\nstatus: ${response.statusCode}\nres: $response');
 
-      return response;
+      return APIResponse(response: response);
     } on DioException catch (e) {
       debugPrint('DioException catch (e.error): ${e.error}');
       debugPrint('DioException catch (e.message): ${e.message}');
@@ -173,7 +174,7 @@ class Api {
     }
   }
 
-  static Future<Response> put(
+  static Future<APIResponse> put(
     String path, {
     FormData? data,
     bool authorized = true,
@@ -201,7 +202,7 @@ class Api {
 
       debugPrint('put: $path\nstatus: ${response.statusCode}\nres: $response');
 
-      return response;
+      return APIResponse(response: response);
     } on DioException catch (e) {
       debugPrint('DioException catch (e.error): ${e.error}');
       debugPrint('DioException catch (e.message): ${e.message}');
@@ -215,7 +216,7 @@ class Api {
     }
   }
 
-  static Future<Response> post(
+  static Future<APIResponse> post(
     String path, {
     Object? data,
     bool authorized = true,
@@ -244,7 +245,7 @@ class Api {
 
       debugPrint('post: $path\nstatus: ${response.statusCode}\nres: $response');
 
-      return response;
+      return APIResponse(response: response);
     } on DioException catch (e) {
       debugPrint('DioException catch (e.error): ${e.error}');
       debugPrint('DioException catch (e.message): ${e.message}');
@@ -252,7 +253,8 @@ class Api {
       debugPrint('DioException catch (e.response): ${e.response}');
       debugPrint('DioException catch (e.type): ${e.type}');
       if (e.response != null) {
-        return e.response!; // Added to catch error
+        // Added to catch error
+        return APIResponse(response: e.response!);
       }
       throw (e);
     } catch (e) {
@@ -261,7 +263,7 @@ class Api {
     }
   }
 
-  static Future<Response> delete(
+  static Future<APIResponse> delete(
     String path, {
     Map<String, dynamic>? params,
     bool authorized = true,
@@ -289,7 +291,7 @@ class Api {
       debugPrint(
           'delete: $path\nstatus: ${response.statusCode}\nres: $response');
 
-      return response;
+      return APIResponse(response: response);
     } on DioException catch (e) {
       debugPrint('DioException catch (e.error): ${e.error}');
       debugPrint('DioException catch (e.message): ${e.message}');
