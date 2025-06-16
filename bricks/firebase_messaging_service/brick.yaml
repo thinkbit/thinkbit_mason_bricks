@@ -6,7 +6,7 @@ version: 1.0.1
 
 # Environment
 environment:
-  mason: ">=0.1.0-dev.60 <0.1.1"
+  mason: any
 
 # No vars needed at the moment
 # vars:
