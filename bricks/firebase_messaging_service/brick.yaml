@@ -2,11 +2,11 @@ name: firebase_messaging_service
 description: A brick that generates Firebase Cloud Messaging events/functions.
 
 # Version
-version: 1.0.0
+version: 1.0.1
 
 # Environment
 environment:
-  mason: ">=0.1.0-dev.60 <0.1.0"
+  mason: ">=0.1.0-dev.60 <0.1.1"
 
 # No vars needed at the moment
 # vars:
