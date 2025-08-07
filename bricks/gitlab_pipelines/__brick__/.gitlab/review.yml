@@ -1,0 +1,52 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+default:
+  tags:
+    - {{tags}}
+
+stages:
+  - Check Format
+  - Testing
+
+.create_firebase_options: &create_firebase_options
+  - |
+    cat <<EOF > lib/firebase_options.dart
+    import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+    
+    class DefaultFirebaseOptions {
+      static FirebaseOptions get currentPlatform {
+        throw UnimplementedError('');
+      }
+    }
+    EOF
+
+Static Analysis:
+  stage: Check Format
+  before_script: *create_firebase_options
+  script:
+    - fvm flutter --version
+    - fvm flutter pub get
+    - fvm dart format -l 120 lib/l10n
+    - fvm dart format -l 120 --set-exit-if-changed .
+    - fvm flutter analyze .
+
+Testing:
+  stage: Testing
+  script:
+    - fvm flutter test --coverage
+    - lcov --remove coverage/lcov.info 'lib/l10n/arb/' --output-file coverage/new_lcov.info
+    - genhtml coverage/new_lcov.info --output-directory coverage/html
+  coverage: '/\s*lines\.*:\s*([\d\.]+%)/'
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+    expire_in: 1 day
+
+Cleanup:
+  stage: .post
+  script:
+    - fvm flutter clean
+    - cd ios && pod deintegrate
