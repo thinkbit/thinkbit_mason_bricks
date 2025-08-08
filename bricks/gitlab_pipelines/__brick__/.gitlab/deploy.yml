@@ -8,10 +8,10 @@ default:
 
 variables:
   FLAVOR: $CI_COMMIT_BRANCH
-  FIREBASE_PROJECT_ID: ${{firebase_project_id}}_$CI_COMMIT_BRANCH
-  PACKAGE_NAME: ${{package_name}}_$CI_COMMIT_BRANCH
-  ANDROID_FIREBASE_APP_ID: ${{android_firebase_app_id}}_$CI_COMMIT_BRANCH
-  IOS_FIREBASE_APP_ID: ${{ios_firebase_app_id}}_$CI_COMMIT_BRANCH
+  FIREBASE_PROJECT_ID: $firebase_project_id_$CI_COMMIT_BRANCH
+  PACKAGE_NAME: $package_name_$CI_COMMIT_BRANCH
+  ANDROID_FIREBASE_APP_ID: $android_firebase_app_id_$CI_COMMIT_BRANCH
+  IOS_FIREBASE_APP_ID: $ios_firebase_app_id_$CI_COMMIT_BRANCH
 
 stages:
   - Setup

@@ -25,11 +25,10 @@ A mason brick to generate the Gitlab Pipelines yml files for CI/CD
 ## Prerequisites :warning:
 
 1. Setup Gitlab Runner
-2. Add necessary environment variables in **Gitlab CI/CD Settings > Variables** with an environment suffix `app_id_development`
-3. Add `FIREBASE_TOKEN` variable
-4. Upload `key.properties` and `upload-keystore.jks` files in **Gitlab CI/CD Settings > Secure Files**
-5. Create a group for the Firebase testers
-6. Package name for both iOS and Android should be the same
+2. Add necessary environment variables in **Gitlab CI/CD Settings > Variables**
+3. Upload `key.properties` and `upload-keystore.jks` files in **Gitlab CI/CD Settings > Secure Files**
+4. Create a group for the Firebase testers
+5. Package name for both iOS and Android should be the same
 
 ---
 
@@ -38,7 +37,5 @@ A mason brick to generate the Gitlab Pipelines yml files for CI/CD
 1. Gitlab Runner Tags to be used
 2. Branch names for the dev, beta, and prod environments
 3. Firebase Testers Group name for Firebase Distribution
-4. Firebase Project ID and the iOS/Android Package name for configuring FlutterFire (without $ and environment suffix)
-5. iOS/Android Firebase App ID for Firebase Distribution (without $ and environment suffix)
 
 [1]: https://github.com/felangel/mason

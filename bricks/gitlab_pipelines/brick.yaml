@@ -1,5 +1,5 @@
 name: gitlab_pipelines
-description: A new brick created with the Mason CLI.
+description: A mason brick to generate the Gitlab Pipelines yml files for CI/CD
 
 version: 0.1.0+1
 
@@ -30,19 +30,3 @@ vars:
     type: string
     description: Name of the Firebase Testers group to be assigned for the distributed build
     prompt: Enter name of the Firebase Testers group to be assigned for the distributed build
-  firebase_project_id:
-    type: string
-    description: Name of the Firebase Project ID variable set in Gitlab
-    prompt: Enter name of the Firebase Project ID variable set in Gitlab without the environment suffix and dollar sign
-  package_name:
-    type: string
-    description: Name of the iOS/Android package name variable set in Gitlab
-    prompt: Enter name of the iOS/Android package name variable set in Gitlab without the environment suffix and dollar sign
-  android_firebase_app_id:
-    type: string
-    description: Name of the Android Firebase App ID variable set in Gitlab
-    prompt: Enter name of the Android Firebase App ID variable set in Gitlab without the environment suffix and dollar sign
-  ios_firebase_app_id:
-    type: string
-    description: Name of the iOS Firebase App ID variable set in Gitlab
-    prompt: Enter name of the iOS Firebase App ID variable set in Gitlab without the environment suffix and dollar sign
