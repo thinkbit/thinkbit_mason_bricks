@@ -1,0 +1,13 @@
+include:
+  - local: '.gitlab/review.yml'
+    rules:
+      - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  - local: '.gitlab/deploy.yml'
+    rules:
+      - if: $CI_PIPELINE_SOURCE == "push" && ($CI_COMMIT_BRANCH == "{{dev_branch}}" || $CI_COMMIT_BRANCH == "{{prod_branch}}" || $CI_COMMIT_BRANCH == "{{beta_branch}}")
+
+# https://gitlab.com/gitlab-org/gitlab/-/issues/341693
+visible-job-lint-fix:
+  stage: .pre
+  rules: [ when: never ]
+  script: [ echo "This is a visible job (but never runs)" ]

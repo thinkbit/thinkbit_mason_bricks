@@ -1,0 +1,77 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && ($CI_COMMIT_BRANCH == "{{dev_branch}}" || $CI_COMMIT_BRANCH == "{{prod_branch}}" || $CI_COMMIT_BRANCH == "{{beta_branch}}")
+
+default:
+  tags:
+    - {{tags}}
+
+variables:
+  FLAVOR: $CI_COMMIT_BRANCH
+  FIREBASE_PROJECT_ID: $firebase_project_id_$CI_COMMIT_BRANCH
+  PACKAGE_NAME: $package_name_$CI_COMMIT_BRANCH
+  ANDROID_FIREBASE_APP_ID: $android_firebase_app_id_$CI_COMMIT_BRANCH
+  IOS_FIREBASE_APP_ID: $ios_firebase_app_id_$CI_COMMIT_BRANCH
+
+stages:
+  - Setup
+  - Build
+  - Distribution
+
+.setup-flutterfire: &setup-flutterfire
+  - fvm dart pub global activate flutterfire_cli
+  - export PATH="$PATH":"$HOME/.pub-cache/bin"
+  - fvm exec flutterfire configure --project=$FIREBASE_PROJECT_ID --platforms android,ios -a $PACKAGE_NAME -i $PACKAGE_NAME -y
+
+Build APK:
+  stage: Build
+  before_script: *setup-flutterfire
+  script:
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+    - mv android/upload-keystore.jks android/app
+    - fvm flutter pub get
+    - |
+      BUILD_COMMAND="fvm flutter build apk -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR}"
+      if [ "$CI_COMMIT_BRANCH" = {{prod_branch}} ]; then
+        BUILD_COMMAND="$BUILD_COMMAND --obfuscate --split-debug-info=build/app/outputs/symbols"
+      fi
+      echo "Running: $BUILD_COMMAND"
+      eval $BUILD_COMMAND
+  artifacts:
+    paths:
+      - build/app/outputs/flutter-apk/app-$FLAVOR-release.apk
+    expire_in: 1 day
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: 'android/'
+
+Build IPA:
+  stage: Build
+  before_script: *setup-flutterfire
+  script:
+    - fvm flutter pub get
+    - |
+      BUILD_COMMAND="fvm flutter build ipa -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR}"
+      if [ "$CI_COMMIT_BRANCH" = {{beta_branch}} ]; then
+        BUILD_COMMAND="$BUILD_COMMAND --export-method ad-hoc"
+      fi
+      echo "Running: $BUILD_COMMAND"
+      eval $BUILD_COMMAND
+    - mv build/ios/ipa/*.ipa app.ipa
+  artifacts:
+    paths:
+      - app.ipa
+    expire_in: 1 day
+
+Firebase Dist.:
+  stage: Distribution
+  script:
+    - OUTPUT=$(git log --grep="^feat:" --pretty=format:"%s")
+    - echo $OUTPUT
+    - firebase appdistribution:distribute build/app/outputs/flutter-apk/app-$FLAVOR-release.apk --app $ANDROID_FIREBASE_APP_ID --release-notes "$OUTPUT" --groups {{firebase_group}} --token $FIREBASE_TOKEN
+    - firebase appdistribution:distribute app.ipa --app $IOS_FIREBASE_APP_ID --release-notes "$OUTPUT" --groups {{firebase_group}} --token $FIREBASE_TOKEN
+
+Cleanup:
+  stage: .post
+  script:
+    - fvm flutter clean
+    - cd ios && pod deintegrate

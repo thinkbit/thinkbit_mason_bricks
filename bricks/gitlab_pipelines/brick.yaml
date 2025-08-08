@@ -1,0 +1,32 @@
+name: gitlab_pipelines
+description: A mason brick to generate the Gitlab Pipelines yml files for CI/CD
+
+version: 0.1.0+1
+
+environment:
+  mason: ^0.1.1
+
+vars:
+  tags:
+    type: string
+    description: Gitlab Runner Tags to be used
+    prompt: Enter the tags of the Gitlab Runner to be used
+  dev_branch:
+    type: string
+    description: Name of the branch for the development environment
+    default: develop
+    prompt: Enter the name of the branch for the development environment
+  beta_branch:
+    type: string
+    description: Name of the branch for the beta environment
+    default: beta
+    prompt: Enter the name of the branch for the beta environment
+  prod_branch:
+    type: string
+    description: Name of the branch for the production environment
+    default: production
+    prompt: Enter the name of the branch for the production environment
+  firebase_group:
+    type: string
+    description: Name of the Firebase Testers group to be assigned for the distributed build
+    prompt: Enter name of the Firebase Testers group to be assigned for the distributed build
