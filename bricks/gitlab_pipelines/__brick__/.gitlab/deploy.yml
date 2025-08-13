@@ -21,7 +21,8 @@ stages:
 .setup-flutterfire: &setup-flutterfire
   - fvm dart pub global activate flutterfire_cli
   - export PATH="$PATH":"$HOME/.pub-cache/bin"
-  - fvm exec flutterfire configure --project=$FIREBASE_PROJECT_ID --platforms android,ios -a $PACKAGE_NAME -i $PACKAGE_NAME -y
+  - rm ios/Runner/GoogleService-Info.plist
+  - fvm exec flutterfire configure --project=$FIREBASE_PROJECT_ID --platforms android,ios -a $PACKAGE_NAME -i $PACKAGE_NAME -y --token $FIREBASE_TOKEN
 
 Build APK:
   stage: Build
@@ -29,7 +30,7 @@ Build APK:
   script:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     - mv upload-keystore.jks android/app/upload-keystore.jks
-    - mv keystore.properties android/keystore.properties
+    - mv key.properties android/key.properties
     - fvm flutter pub get
     - |
       BUILD_COMMAND="fvm flutter build apk -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR}"
@@ -43,13 +44,16 @@ Build APK:
       - build/app/outputs/flutter-apk/app-$FLAVOR-release.apk
     expire_in: 1 day
   variables:
-    SECURE_FILES_DOWNLOAD_PATH: 'android/'
+    SECURE_FILES_DOWNLOAD_PATH: "/"
 
 Build IPA:
   stage: Build
   before_script: *setup-flutterfire
   script:
     - fvm flutter pub get
+    - rm ios/Podfile.lock
+    - cd ios && pod install --repo-update
+    - cd ..
     - |
       BUILD_COMMAND="fvm flutter build ipa -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR}"
       if [ "$CI_COMMIT_BRANCH" = {{beta_branch}} ]; then
