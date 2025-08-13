@@ -1,7 +1,7 @@
 name: gitlab_pipelines
 description: A mason brick to generate the Gitlab Pipelines yml files for CI/CD
 
-version: 0.1.0+1
+version: 0.2.0
 
 environment:
   mason: ^0.1.1

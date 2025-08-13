@@ -1,0 +1,26 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+stages:
+  - Reviewer
+
+Reviewer:
+  stage: Reviewer
+  tags:
+    - {{tags}}
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: "/"
+    DANGER_GITLAB_API_TOKEN: $GITLAB_TOKEN
+    GEMINI_API_KEY: $GEMINI_API_KEY
+  before_script:
+    - echo "Downloading Secure Files..."
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+    - echo "Verifying Node.js and npm versions..."
+    - node -v
+    - npm -v
+    - echo "Installing project dependencies...."
+    - npm install
+  script:
+    - echo "Executing Danger JS with secure dangerfile..."
+    - npx danger ci --dangerfile dangerfile.js 
