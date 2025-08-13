@@ -28,7 +28,8 @@ Build APK:
   before_script: *setup-flutterfire
   script:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    - mv android/upload-keystore.jks android/app
+    - mv upload-keystore.jks android/app/upload-keystore.jks
+    - mv keystore.properties android/keystore.properties
     - fvm flutter pub get
     - |
       BUILD_COMMAND="fvm flutter build apk -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR}"
