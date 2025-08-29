@@ -1,0 +1,7 @@
+name: permission_config
+description: Automatically configures Android and iOS permissions for your Flutter app.
+
+version: 0.1.0+1
+
+environment:
+  mason: ^0.1.1
