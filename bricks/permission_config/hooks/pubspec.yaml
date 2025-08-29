@@ -1,0 +1,10 @@
+name: permission_config_hooks
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  mason: ^0.1.1
+  path: ^1.9.0
+  xml: ^6.5.0
+  logger: ^2.0.2
