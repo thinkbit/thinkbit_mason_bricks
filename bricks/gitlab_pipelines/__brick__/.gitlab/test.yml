@@ -9,6 +9,7 @@ default:
 stages:
   - Check Format
   - Testing
+  - External
 
 .create_firebase_options: &create_firebase_options
   - |
@@ -44,6 +45,13 @@ Testing:
     paths:
       - coverage/
     expire_in: 1 day
+
+OSV Scanner:
+  stage: External
+  script:
+    - fvm flutter pub get
+    - osv-scanner scan --format table --call-analysis -lockfile pubspec.lock
+  allow_failure: true
 
 Cleanup:
   stage: .post
