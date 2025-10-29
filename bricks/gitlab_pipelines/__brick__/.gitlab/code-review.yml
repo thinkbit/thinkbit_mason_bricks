@@ -21,7 +21,7 @@ Reviewer:
     - echo "Downloading Secure Files..."
     # This command downloads the uploaded files (package.json and danger.js)
     # into the path specified by SECURE_FILES_DOWNLOAD_PATH (which is '/')
-    - curl --silent "[https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer](https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer)" | bash
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     - echo "Installing project dependencies...."
     - npm install
   script:
