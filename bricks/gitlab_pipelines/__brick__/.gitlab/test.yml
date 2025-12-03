@@ -57,4 +57,3 @@ Cleanup:
   stage: .post
   script:
     - fvm flutter clean
-    - cd ios && pod deintegrate
