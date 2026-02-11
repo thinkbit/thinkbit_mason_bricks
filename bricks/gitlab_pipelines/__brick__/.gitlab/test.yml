@@ -27,7 +27,7 @@ Static Analysis:
   stage: Check Format
   before_script: *create_firebase_options
   script:
-    - fvm flutter --version
+    - fvm list
     - fvm flutter pub get
     - fvm dart format -l 120 lib/l10n
     - fvm dart format -l 120 --set-exit-if-changed .
@@ -36,6 +36,7 @@ Static Analysis:
 Testing:
   stage: Testing
   script:
+    - fvm flutter pub get
     - fvm flutter test --coverage
     - lcov --remove coverage/lcov.info 'lib/l10n/arb/' --output-file coverage/new_lcov.info
     - genhtml coverage/new_lcov.info --output-directory coverage/html
