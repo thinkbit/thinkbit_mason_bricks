@@ -7,6 +7,7 @@
 - add missing `=` in export method flag when building ipa
 - wrap `groups` flag value with quotation marks
 - replace `pod deintegrate` in deploy workflow with deleting `Pods` and `.gradle` directories instead
+- add build_runner steps respectively
 
 # 0.2.0
 - Add pipeline for Code Review
