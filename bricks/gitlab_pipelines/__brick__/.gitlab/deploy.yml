@@ -30,6 +30,7 @@ Build APK:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     - mv upload-keystore.jks android/app/upload-keystore.jks
     - mv key.properties android/key.properties
+    - fvm dart run build_runner build --delete-conflicting-outputs
     - |
       BUILD_COMMAND="fvm flutter build apk -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR}"
       if [ "$CI_COMMIT_BRANCH" = {{prod_branch}} ]; then
@@ -48,6 +49,7 @@ Build IPA:
   stage: Build
   before_script: *setup-flutterfire
   script:
+    - fvm dart run build_runner build --delete-conflicting-outputs
     - rm ios/Podfile.lock
     - fvm flutter build ipa -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR} --export-method=ad-hoc
     - mv build/ios/ipa/*.ipa app.ipa

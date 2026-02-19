@@ -29,6 +29,7 @@ Static Analysis:
   script:
     - fvm list
     - fvm flutter pub get
+    - fvm dart run build_runner build --delete-conflicting-outputs
     - fvm dart format -l 120 lib/l10n
     - fvm dart format -l 120 --set-exit-if-changed .
     - fvm flutter analyze .
@@ -37,6 +38,7 @@ Testing:
   stage: Testing
   script:
     - fvm flutter pub get
+    - fvm dart run build_runner build --delete-conflicting-outputs
     - fvm flutter test --coverage
     - lcov --remove coverage/lcov.info 'lib/l10n/arb/' --output-file coverage/new_lcov.info
     - genhtml coverage/new_lcov.info --output-directory coverage/html
