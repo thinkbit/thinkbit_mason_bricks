@@ -25,9 +25,10 @@ environment:
 #  * an optional prompt phrase used when asking for the variable
 #  * a list of values (enums only)
 #  * an optional separator (list only)
-# vars:
-#   name:
-#     type: string
-#     description: Your name
-#     default: Dash
-#     prompt: What is your name?
+# Variables
+vars:
+  flavors:
+    type: list
+    description: List of flavor names for your application (e.g. dev, staging, production)
+    default: dev, beta, production
+    prompt: Enter flavor names separated by commas
