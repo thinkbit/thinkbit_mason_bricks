@@ -8,10 +8,20 @@ version: 1.0.1
 environment:
   mason: ^0.1.1
 
-# No vars needed at the moment
-# vars:
-#   name:
-#     type: string
-#     description: Your name
-#     default: Dash
-#     prompt: What is your name?
+# Variables
+vars:
+  channel_id:
+    type: string
+    description: Unique ID for the Android notification channel.
+    default: high_importance_channel
+    prompt: Enter the Android notification channel ID.
+  channel_name:
+    type: string
+    description: Human-readable name for the notification channel.
+    default: High Importance Notifications
+    prompt: Enter the Android notification channel name.
+  notification_icon:
+    type: string
+    description: The drawable resource name for the notification icon (e.g., @mipmap/ic_launcher).
+    default: "@mipmap/ic_launcher"
+    prompt: Enter the notification icon resource name.

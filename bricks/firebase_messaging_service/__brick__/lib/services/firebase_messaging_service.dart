@@ -8,19 +8,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class FirebaseMessagingService {
+  FirebaseMessagingService._();
+  static final FirebaseMessagingService instance = FirebaseMessagingService._();
+
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  static final _flutterLocalNotificationPlugin =
-      FlutterLocalNotificationsPlugin();
+  static final _flutterLocalNotificationPlugin = FlutterLocalNotificationsPlugin();
 
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
-    'high_importance_channel', // id
-    'High Importance Notifications', // title
+    '{{channel_id}}', // id
+    '{{channel_name}}', // title
     description: 'This channel is used for important notifications.',
     importance: Importance.max,
   );
 
-  /// https://stackoverflow.com/questions/64314719/what-does-pragmavmprefer-inline-mean-in-flutter#:~:text=keyword%20in%20Kotlin-,%40pragma(%22vm%3Aentry%2Dpoint%22),-to%20mark%20a
-  /// https://mrale.ph/dartvm/compiler/aot/entry_point_pragma.html
+  /// Controller for exposing FCM message events to the UI/other services.
+  final _messageStreamController = StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get messageStream => _messageStreamController.stream;
+
+  /// Callback for token updates.
+  Function(String)? onTokenUpdate;
+
   @pragma('vm:entry-point')
   static void onDidReceiveBackgroundNotificationResponse(
     NotificationResponse? details,
@@ -29,33 +36,54 @@ class FirebaseMessagingService {
 
     debugPrint('onDidReceiveBackgroundNotificationResponse');
     debugPrint('payload ${details.payload}');
+    
+    if (details.payload != null) {
+      instance._messageStreamController.add(json.decode(details.payload!));
+    }
   }
 
-  Future<void> initFirebaseMessaging() async {
+  Future<void> initFirebaseMessaging({Function(String)? onTokenUpdate}) async {
+    this.onTokenUpdate = onTokenUpdate;
+    
     await _requestPermissions();
+    _setupTokenListeners();
     _onBackgroundMessage();
     _onForegroundMessage();
     await _handleMessageInteraction();
+    await _initializeLocalNotifications();
+  }
+
+  void _setupTokenListeners() {
+    // Get initial token
+    getFcmToken().then((token) {
+      if (token != null) onTokenUpdate?.call(token);
+    });
+
+    // Listen for refresh
+    _firebaseMessaging.onTokenRefresh.listen((newToken) {
+      debugPrint('FCM Token Refreshed: $newToken');
+      onTokenUpdate?.call(newToken);
+    });
   }
 
   Future<String?> getFcmToken() async {
-    final response = await _firebaseMessaging.getToken();
-    debugPrint('FCM token: $response');
-
-    return response;
+    try {
+      final response = await _firebaseMessaging.getToken();
+      debugPrint('FCM token: $response');
+      return response;
+    } catch (e) {
+      debugPrint('Error getting FCM token: $e');
+      return null;
+    }
   }
 
   Future<bool> _requestPermissions() async {
     debugPrint('Requesting permissions');
     try {
       final response = await _firebaseMessaging.requestPermission();
-
       return response.authorizationStatus == AuthorizationStatus.authorized;
     } on Exception catch (e, s) {
-      debugPrint('Error requesting permissions');
-      debugPrint('e: $e)');
-      debugPrint('s: $s)');
-
+      debugPrint('Error requesting permissions: $e');
       return false;
     }
   }
@@ -67,11 +95,10 @@ class FirebaseMessagingService {
         debugPrint('Foreground message received, data: ${message.data}');
 
         if (message.notification != null) {
-          debugPrint('Message has notification, ');
-          debugPrint('notification: ${message.notification?.title}');
-          debugPrint('notification: ${message.notification?.body}');
           _displayNotificationsAndroid(message);
         }
+        
+        _messageStreamController.add(message.data);
       },
     );
   }
@@ -80,15 +107,15 @@ class FirebaseMessagingService {
     return FirebaseMessaging.onBackgroundMessage(_backgroundMessageHandler);
   }
 
+  @pragma('vm:entry-point')
   static Future<void> _backgroundMessageHandler(RemoteMessage message) async {
     await Firebase.initializeApp();
-    debugPrint("Handling a background message");
+    debugPrint("Handling a background message: ${message.messageId}");
 
     log(
       'Background message received, '
       'data: ${message.data}, '
-      'notification title: ${message.notification?.title}'
-      'notification body: ${message.notification?.body}',
+      'notification title: ${message.notification?.title}',
     );
   }
 
@@ -96,18 +123,17 @@ class FirebaseMessagingService {
     final notification = message.notification;
     final android = message.notification?.android;
 
-    if (notification == null || android == null) {
-      return;
-    }
+    if (notification == null) return;
 
     final androidNotificationDetails = AndroidNotificationDetails(
       _channel.id,
       _channel.name,
       channelDescription: _channel.description,
-      icon: '@mipmap/ic_launcher',
-      colorized: true,
-      color: const Color(0xFFE07C4F),
+      icon: '{{notification_icon}}', 
+      importance: Importance.max,
+      priority: Priority.high,
     );
+    
     final payload = json.encode(message.data);
 
     _flutterLocalNotificationPlugin.show(
@@ -124,43 +150,45 @@ class FirebaseMessagingService {
 
   Future<void> _handleMessageInteraction() async {
     debugPrint('Handling message interactions');
-    await _handleBackgroundMessageInteraction();
-    _handleForegroundMessageInteraction();
-    await _handleLocalNotificationInteraction();
-  }
-
-  Future<void> _handleBackgroundMessageInteraction() async {
+    
+    // Check if app was opened from a terminated state via a notification
     final initialMessage = await _firebaseMessaging.getInitialMessage();
-
     if (initialMessage != null) {
       _handleMessage(initialMessage);
     }
+
+    // Listen for messages when app is in background but still in memory
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
   }
 
-  static StreamSubscription<RemoteMessage>
-      _handleForegroundMessageInteraction() {
-    return FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
-  }
-
-  Future<void> _handleLocalNotificationInteraction() async {
-    await _flutterLocalNotificationPlugin.initialize(
-      const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-      ),
-      onDidReceiveNotificationResponse: (NotificationResponse? details) {
-        if (details == null) return;
-
-        debugPrint('onDidReceiveNotificationResponse');
-        debugPrint('payload ${details.payload}');
-      },
-      onDidReceiveBackgroundNotificationResponse:
-          onDidReceiveBackgroundNotificationResponse,
+  Future<void> _initializeLocalNotifications() async {
+    const initializationSettings = InitializationSettings(
+      android: AndroidInitializationSettings('{{notification_icon}}'),
+      iOS: DarwinInitializationSettings(),
     );
+
+    await _flutterLocalNotificationPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse? details) {
+        if (details?.payload != null) {
+          _messageStreamController.add(json.decode(details!.payload!));
+        }
+      },
+      onDidReceiveBackgroundNotificationResponse: onDidReceiveBackgroundNotificationResponse,
+    );
+
+    // Create the channel for Android
+    await _flutterLocalNotificationPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_channel);
   }
 
-  static void _handleMessage(RemoteMessage message) {
-    // _messageHandler?.call(message.data);
-    debugPrint('_handleMessage');
-    debugPrint('data ${message.data}');
+  void _handleMessage(RemoteMessage message) {
+    debugPrint('Opening app via notification: ${message.data}');
+    _messageStreamController.add(message.data);
+  }
+
+  void dispose() {
+    _messageStreamController.close();
   }
 }
