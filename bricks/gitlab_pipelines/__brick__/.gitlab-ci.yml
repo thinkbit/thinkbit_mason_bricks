@@ -1,10 +1,12 @@
 stages:
+  - .pre
   - Check Format
   - Testing
+  - Setup
   - Build
   - Distribution
-  - External
   - Reviewer
+  - .post
 
 include:
   - local: '.gitlab/test.yml'
