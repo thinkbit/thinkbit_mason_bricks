@@ -14,7 +14,6 @@ variables:
   IOS_FIREBASE_APP_ID: $ios_firebase_app_id_$CI_COMMIT_BRANCH
 
 stages:
-  - Setup
   - Build
   - Distribution
 
@@ -31,7 +30,7 @@ Build APK:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     - mv upload-keystore.jks android/app/upload-keystore.jks
     - mv key.properties android/key.properties
-    - fvm flutter pub get
+    - fvm dart run build_runner build --delete-conflicting-outputs
     - |
       BUILD_COMMAND="fvm flutter build apk -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR}"
       if [ "$CI_COMMIT_BRANCH" = {{prod_branch}} ]; then
@@ -50,17 +49,9 @@ Build IPA:
   stage: Build
   before_script: *setup-flutterfire
   script:
-    - fvm flutter pub get
+    - fvm dart run build_runner build --delete-conflicting-outputs
     - rm ios/Podfile.lock
-    - cd ios && pod install --repo-update
-    - cd ..
-    - |
-      BUILD_COMMAND="fvm flutter build ipa -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR}"
-      if [ "$CI_COMMIT_BRANCH" = {{beta_branch}} ]; then
-        BUILD_COMMAND="$BUILD_COMMAND --export-method ad-hoc"
-      fi
-      echo "Running: $BUILD_COMMAND"
-      eval $BUILD_COMMAND
+    - fvm flutter build ipa -t lib/main_${FLAVOR}.dart --flavor ${FLAVOR} --export-method=ad-hoc
     - mv build/ios/ipa/*.ipa app.ipa
   artifacts:
     paths:
@@ -72,11 +63,12 @@ Firebase Dist.:
   script:
     - OUTPUT=$(git log --grep="^feat:" --pretty=format:"%s")
     - echo $OUTPUT
-    - firebase appdistribution:distribute build/app/outputs/flutter-apk/app-$FLAVOR-release.apk --app $ANDROID_FIREBASE_APP_ID --release-notes "$OUTPUT" --groups {{firebase_group}} --token $FIREBASE_TOKEN
-    - firebase appdistribution:distribute app.ipa --app $IOS_FIREBASE_APP_ID --release-notes "$OUTPUT" --groups {{firebase_group}} --token $FIREBASE_TOKEN
+    - firebase appdistribution:distribute build/app/outputs/flutter-apk/app-$FLAVOR-release.apk --app $ANDROID_FIREBASE_APP_ID --release-notes "$OUTPUT" --groups "{{firebase_group}}" --token $FIREBASE_TOKEN
+    - firebase appdistribution:distribute app.ipa --app $IOS_FIREBASE_APP_ID --release-notes "$OUTPUT" --groups "{{firebase_group}}" --token $FIREBASE_TOKEN
 
 Cleanup:
   stage: .post
   script:
     - fvm flutter clean
-    - cd ios && pod deintegrate
+    - rm -rf ios/Pods
+    - rm -rf android/.gradle
