@@ -12,8 +12,8 @@ class Validator {
       if (text.isEmpty) return null;
 
       final minMax = values.split(',');
-      final min = double.parse(minMax[defaultZero]);
-      final max = double.parse(minMax[defaultOne]);
+      final min = double.parse(minMax[0]);
+      final max = double.parse(minMax[1]);
 
       if (_rules['min']!(text, min.toString()) is String || _rules['max']!(text, max.toString()) is String) {
         return 'This must be between $min and $max.';
@@ -80,7 +80,7 @@ class Validator {
     'phone': (String text) {
       if (text.isEmpty) return null;
       final error = _rules['regex']!(text, phoneRegex);
-      if (error is String) return phoneRequirementMesage;
+      if (error is String) return phoneRequirementMessage;
 
       return true;
     },
@@ -89,7 +89,7 @@ class Validator {
     ///
     'regex': (String text, String expression) {
       if (text.isEmpty) return null;
-      if (!text.contains(RegExp(expression))) return regExInvalid;
+      if (!RegExp(expression).hasMatch(text)) return regExInvalid;
 
       return true;
     },
@@ -120,10 +120,10 @@ class Validator {
       dynamic error;
       final ruleComponents = rule.split(':');
 
-      if (ruleComponents.length == defaultOne) {
-        error = Validator._rules[ruleComponents[defaultZero]]!(text);
-      } else if (ruleComponents.length == defaultTwo) {
-        error = Validator._rules[ruleComponents[defaultZero]]!(text, ruleComponents[defaultOne]);
+      if (ruleComponents.length == 1) {
+        error = Validator._rules[ruleComponents[0]]!(text);
+      } else if (ruleComponents.length == 2) {
+        error = Validator._rules[ruleComponents[0]]!(text, ruleComponents[1]);
       } else {
         assert(false, 'Invalid rule.');
       }
