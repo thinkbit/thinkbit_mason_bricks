@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 // since this is a configuration file.
 // ignore: constant_identifier_names
 enum Flavor { 
@@ -18,7 +16,7 @@ class FlavorValues {
 class FlavorConfig {
   final Flavor flavor;
   final String name;
-  final Color color;
+  final int color;
   final Duration apiTimeoutDuration;
   final FlavorValues values;
   static FlavorConfig? _instance;
@@ -26,7 +24,7 @@ class FlavorConfig {
   factory FlavorConfig(
       {required Flavor flavor,
       required FlavorValues values,
-      Color color = Colors.blue,
+      int color = 0xFF2196F3, // Default blue
       Duration apiTimeoutDuration = const Duration(seconds: 30)}) {
     _instance ??= FlavorConfig._internal(
         flavor, flavor.toString(), color, values, apiTimeoutDuration);

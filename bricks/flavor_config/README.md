@@ -33,7 +33,7 @@ Create entry points for each flavor: `main_dev.dart`, `main_prod.dart`, etc.
 void main() {
   FlavorConfig(
     flavor: Flavor.DEV,
-    color: Colors.red,
+    color: 0xFFF44336, // Red
     values: FlavorValues(
       baseUrl: "https://dev.api.example.com",
       apiUrl: "/api/v1",
