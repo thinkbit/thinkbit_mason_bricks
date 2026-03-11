@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 
 // since this is a configuration file.
 // ignore: constant_identifier_names
-enum Flavor { DEV, BETA, PRODUCTION, TESTING }
+enum Flavor { 
+  {{#flavors}}
+  {{#upper}}{{this}}{{/upper}},
+  {{/flavors}}
+}
 
 class FlavorValues {
   FlavorValues({required this.baseUrl, required this.apiUrl});
@@ -35,8 +39,7 @@ class FlavorConfig {
     return _instance;
   }
 
-  static bool isProduction() => _instance!.flavor == Flavor.PRODUCTION;
-  static bool isDevelopment() => _instance!.flavor == Flavor.DEV;
-  static bool isBeta() => _instance!.flavor == Flavor.BETA;
-  static bool isTesting() => _instance!.flavor == Flavor.TESTING;
+  {{#flavors}}
+  static bool is{{#pascal}}{{this}}{{/pascal}}() => _instance!.flavor == Flavor.{{#upper}}{{this}}{{/upper}};
+  {{/flavors}}
 }
