@@ -1,31 +1,41 @@
 import 'package:dio/dio.dart';
 
 /// The response from an API request.
-class APIResponse extends Response<dynamic> {
+class APIResponse {
+  final Response<dynamic>? response;
+  final String? errorMessage;
+  final ResponseStatus status;
+
   APIResponse({
-    required this.response,
+    this.response,
     this.errorMessage,
     this.status = ResponseStatus.unknown,
-  }) : super(
-          data: response.data,
-          requestOptions: response.requestOptions,
-          extra: response.extra,
-          headers: response.headers,
-          statusCode: response.statusCode,
-          statusMessage: response.statusMessage,
-          redirects: response.redirects,
-          isRedirect: response.isRedirect,
-        ) {
-    errorMessage = APIExceptionMessageHandler.parseResponseBody(
-        result: super.data as Map<String, dynamic>);
-    status =
-        APIStatusHandler.parseStatusCode(statusCode: super.statusCode);
+  });
+
+  /// Factory constructor to create an [APIResponse] from a Dio [Response].
+  factory APIResponse.fromResponse(Response<dynamic> response) {
+    final status = APIStatusHandler.parseStatusCode(statusCode: response.statusCode);
+    String? error;
+    
+    if (status != ResponseStatus.success && response.data is Map<String, dynamic>) {
+       error = APIExceptionMessageHandler.parseResponseBody(
+        result: response.data as Map<String, dynamic>);
+    }
+
+    return APIResponse(
+      response: response,
+      errorMessage: error,
+      status: status,
+    );
   }
 
-  final Response<dynamic> response;
-  String? errorMessage;
-  ResponseStatus status;
+  /// Helper to get the response data.
+  dynamic get data => response?.data;
 
+  /// Helper to get the status code.
+  int? get statusCode => response?.statusCode;
+
+  /// Returns true if the request was successful.
   bool isSuccess() => status == ResponseStatus.success;
 }
 
@@ -48,7 +58,7 @@ class APIStatusHandler {
       return ResponseStatus.unauthorized;
     } else if (statusCode == 404) {
       return ResponseStatus.notFound;
-    } else if (statusCode < 200 || statusCode >= 300) {
+    } else if (statusCode < 200 || statusCode >= 400) {
       return ResponseStatus.forbidden;
     } else {
       return ResponseStatus.error;
