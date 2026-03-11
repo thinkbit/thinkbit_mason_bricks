@@ -16,7 +16,7 @@ A mason brick to generate the Gitlab Pipelines yml files for CI/CD
         git:
           url: https://github.com/thinkbit/thinkbit_mason_bricks.git
           path: bricks/gitlab_pipelines
-    ``` 
+    ```
 3. **Fetch the Brick:** `mason get`
 4. **Generate the pipeline files:** `mason make gitlab_pipelines`
 
@@ -32,7 +32,7 @@ A mason brick to generate the Gitlab Pipelines yml files for CI/CD
 
 ---
 
-## Variables Required During Generation :exclamation: 
+## Variables Required During Generation :exclamation:
 
 1. Gitlab Runner Tags to be used
 2. Branch names for the dev, beta, and prod environments

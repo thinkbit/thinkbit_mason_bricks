@@ -17,4 +17,4 @@ include:
       - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
   - local: '.gitlab/deploy.yml'
     rules:
-      - if: $CI_PIPELINE_SOURCE == 'push' && ($CI_COMMIT_BRANCH == '{{dev_branch}}' || $CI_COMMIT_BRANCH == '{{prod_branch}}' || $CI_COMMIT_BRANCH == '{{beta_branch}}')
+      - if: $CI_PIPELINE_SOURCE == 'push' && ($CI_COMMIT_BRANCH == '{{prod_branch}}' || $CI_COMMIT_BRANCH == '{{beta_branch}}')
