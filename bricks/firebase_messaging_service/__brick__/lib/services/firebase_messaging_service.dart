@@ -15,8 +15,8 @@ class FirebaseMessagingService {
   static final _flutterLocalNotificationPlugin = FlutterLocalNotificationsPlugin();
 
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
-    '{{channel_id}}', // id
-    '{{channel_name}}', // title
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
     description: 'This channel is used for important notifications.',
     importance: Importance.max,
   );
@@ -129,7 +129,7 @@ class FirebaseMessagingService {
       _channel.id,
       _channel.name,
       channelDescription: _channel.description,
-      icon: '{{notification_icon}}', 
+      icon: '@mipmap/ic_launcher', 
       importance: Importance.max,
       priority: Priority.high,
     );
@@ -163,7 +163,7 @@ class FirebaseMessagingService {
 
   Future<void> _initializeLocalNotifications() async {
     const initializationSettings = InitializationSettings(
-      android: AndroidInitializationSettings('{{notification_icon}}'),
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       iOS: DarwinInitializationSettings(),
     );
 
