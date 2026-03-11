@@ -8,78 +8,55 @@ import 'package:retry/retry.dart';
 import 'api_response.dart';
 
 class Api {
+  Api._();
+  static final Api instance = Api._();
+
   // static String baseUrl = FlavorConfig.instance!.values.baseUrl;
   static String baseUrl = 'http://127.0.0.1:8000';
-  static String apiUrl = baseUrl + '/api';
+  static String apiUrl = '$baseUrl/api';
 
-  // static Duration timeoutDuration = FlavorConfig.instance!.apiTimeoutDuration;
   static Duration timeoutDuration = const Duration(minutes: 1);
 
   static final dioRetry = RetryOptions(maxAttempts: 3);
 
   static Dio dio = Dio(
     BaseOptions(
-      connectTimeout: Duration(minutes: 1),
-      sendTimeout: Duration(minutes: 1),
-      receiveTimeout: Duration(minutes: 1),
+      connectTimeout: timeoutDuration,
+      sendTimeout: timeoutDuration,
+      receiveTimeout: timeoutDuration,
       validateStatus: (statusCode) {
-        if (statusCode == null) {
-          return false;
-        }
-        if (statusCode == 422) {
-          // server cannot process the request
+        if (statusCode == null) return false;
+        
+        // Return true for common error codes so we can parse the response body
+        if (statusCode == 422 || statusCode == 401 || statusCode == 400 || statusCode == 404) {
           return true;
-        } else if (statusCode == 401) {
-          // user is not authorized
-          // _forceSignOut();
-          return true;
-        } else {
-          // check status code is successful
-          return statusCode >= 200 && statusCode < 300;
         }
+        
+        return statusCode >= 200 && statusCode < 300;
       },
     ),
-  )..interceptors.add(
-      RequestsInspectorInterceptor()
-  );
+  )..interceptors.add(RequestsInspectorInterceptor());
 
-  static Future<Map<String, String>> headers({required bool authorized}) async {
+  Future<Map<String, String>> headers({required bool authorized}) async {
     Map<String, String> headers = <String, String>{
       'accept': 'application/json',
       'content-type': 'application/json',
     };
 
     if (authorized) {
-      // String? token = await SecureStorage().read(key: Constants.authToken);
+      // TODO: Replace with your actual token retrieval logic
       String? token = 'auth token here';
       debugPrint('authToken: $token');
 
       if (token != null) {
-        headers['Authorization'] = 'Bearer ${token}';
-      } else {
-        // await _forceSignOut();
+        headers['Authorization'] = 'Bearer $token';
       }
     }
 
     return headers;
   }
 
-  static _getPostmanBulkEdit(String params) {
-    String modifiedData = params
-        .replaceAll('{', '')
-        .replaceAll('}', '')
-        // .replaceAll('[', '')
-        // .replaceAll(']', '')
-        .replaceAll('(', '')
-        .replaceAll(')', '')
-        .replaceAll('MapEntry', '')
-        .replaceAll(': ', ':')
-        .replaceAll(', ', '\n');
-    String bulkEdit = 'POSTMAN BULK EDIT:\n$modifiedData';
-    return bulkEdit;
-  }
-
-  static bool toRetry(e) {
+  bool _shouldRetry(Object e) {
     if (e is DioException) {
       return e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.sendTimeout ||
@@ -89,18 +66,16 @@ class Api {
     return e is SocketException || e is TimeoutException;
   }
 
-  static Future<APIResponse> get(
+  Future<APIResponse> get(
     String path, {
     Map<String, dynamic>? params,
     bool authorized = true,
     ResponseType? responseType,
   }) async {
     try {
-      final Map<String, String> headers =
-          await Api.headers(authorized: authorized);
+      final headers = await this.headers(authorized: authorized);
 
-      debugPrint('get: $apiUrl/$path');
-      debugPrint('get: ${_getPostmanBulkEdit(params.toString())}');
+      debugPrint('API [GET]: $apiUrl/$path');
 
       final response = await dioRetry.retry(
         () => dio.get(
@@ -108,200 +83,140 @@ class Api {
           queryParameters: params,
           options: Options(
             headers: headers,
-            receiveTimeout: timeoutDuration,
-            sendTimeout: timeoutDuration,
             responseType: responseType,
           ),
         ),
-        retryIf: (e) => toRetry(e),
+        retryIf: _shouldRetry,
       );
 
-      debugPrint('get: $path\nstatus: ${response.statusCode}\nres: $response');
-
-      return APIResponse(response: response);
+      return APIResponse.fromResponse(response);
     } on DioException catch (e) {
-      debugPrint('DioException catch (e.error): ${e.error}');
-      debugPrint('DioException catch (e.message): ${e.message}');
-      debugPrint('DioException catch (e.requestOptions): ${e.requestOptions}');
-      debugPrint('DioException catch (e.response): ${e.response}');
-      debugPrint('DioException catch (e.type): ${e.type}');
-      throw (e);
+      debugPrint('API [GET] Error: ${e.message}');
+      if (e.response != null) return APIResponse.fromResponse(e.response!);
+      rethrow;
     } catch (e) {
-      debugPrint('API catch (e): $e');
-      throw (e);
+      debugPrint('API [GET] Unexpected Error: $e');
+      rethrow;
     }
   }
 
-  static Future<APIResponse> patch(
-    String path, {
-    Map<String, dynamic>? params,
-    bool authorized = true,
-  }) async {
-    try {
-      final Map<String, String> headers =
-          await Api.headers(authorized: authorized);
-
-      debugPrint('patch: $apiUrl/$path');
-      debugPrint('patch: ${_getPostmanBulkEdit(params.toString())}');
-
-      final response = await dioRetry.retry(
-        () => dio.patch(
-          '$apiUrl/$path',
-          queryParameters: params,
-          options: Options(
-            headers: headers,
-            receiveTimeout: timeoutDuration,
-            sendTimeout: timeoutDuration,
-          ),
-        ),
-        retryIf: (e) => toRetry(e),
-      );
-
-      debugPrint(
-          'patch: $path\nstatus: ${response.statusCode}\nres: $response');
-
-      return APIResponse(response: response);
-    } on DioException catch (e) {
-      debugPrint('DioException catch (e.error): ${e.error}');
-      debugPrint('DioException catch (e.message): ${e.message}');
-      debugPrint('DioException catch (e.requestOptions): ${e.requestOptions}');
-      debugPrint('DioException catch (e.response): ${e.response}');
-      debugPrint('DioException catch (e.type): ${e.type}');
-      throw (e);
-    } catch (e) {
-      debugPrint('API catch (e): $e');
-      throw (e);
-    }
-  }
-
-  static Future<APIResponse> put(
-    String path, {
-    FormData? data,
-    bool authorized = true,
-  }) async {
-    try {
-      final Map<String, String> headers =
-          await Api.headers(authorized: authorized);
-
-      debugPrint('put: $apiUrl/$path');
-      debugPrint(
-          'put: ${_getPostmanBulkEdit(data != null ? data.fields.toString() : '')}');
-
-      final response = await dioRetry.retry(
-        () => dio.put(
-          '$apiUrl/$path',
-          data: data,
-          options: Options(
-            headers: headers,
-            receiveTimeout: timeoutDuration,
-            sendTimeout: timeoutDuration,
-          ),
-        ),
-        retryIf: (e) => toRetry(e),
-      );
-
-      debugPrint('put: $path\nstatus: ${response.statusCode}\nres: $response');
-
-      return APIResponse(response: response);
-    } on DioException catch (e) {
-      debugPrint('DioException catch (e.error): ${e.error}');
-      debugPrint('DioException catch (e.message): ${e.message}');
-      debugPrint('DioException catch (e.requestOptions): ${e.requestOptions}');
-      debugPrint('DioException catch (e.response): ${e.response}');
-      debugPrint('DioException catch (e.type): ${e.type}');
-      throw (e);
-    } catch (e) {
-      debugPrint('API catch (e): $e');
-      throw (e);
-    }
-  }
-
-  static Future<APIResponse> post(
+  Future<APIResponse> post(
     String path, {
     Object? data,
     bool authorized = true,
   }) async {
     try {
-      final Map<String, String> headers =
-          await Api.headers(authorized: authorized);
+      final headers = await this.headers(authorized: authorized);
 
-      debugPrint('post: $apiUrl/$path');
-      if (data != null && data is FormData) {
-        debugPrint('post: ${_getPostmanBulkEdit(data.fields.toString())}');
-      }
+      debugPrint('API [POST]: $apiUrl/$path');
 
       final response = await dioRetry.retry(
         () => dio.post(
           '$apiUrl/$path',
           data: data,
-          options: Options(
-            headers: headers,
-            receiveTimeout: timeoutDuration,
-            sendTimeout: timeoutDuration,
-          ),
+          options: Options(headers: headers),
         ),
-        retryIf: (e) => toRetry(e),
+        retryIf: _shouldRetry,
       );
 
-      debugPrint('post: $path\nstatus: ${response.statusCode}\nres: $response');
-
-      return APIResponse(response: response);
+      return APIResponse.fromResponse(response);
     } on DioException catch (e) {
-      debugPrint('DioException catch (e.error): ${e.error}');
-      debugPrint('DioException catch (e.message): ${e.message}');
-      debugPrint('DioException catch (e.requestOptions): ${e.requestOptions}');
-      debugPrint('DioException catch (e.response): ${e.response}');
-      debugPrint('DioException catch (e.type): ${e.type}');
-      if (e.response != null) {
-        // Added to catch error
-        return APIResponse(response: e.response!);
-      }
-      throw (e);
+      debugPrint('API [POST] Error: ${e.message}');
+      if (e.response != null) return APIResponse.fromResponse(e.response!);
+      rethrow;
     } catch (e) {
-      debugPrint('API catch (e): $e');
-      throw (e);
+      debugPrint('API [POST] Unexpected Error: $e');
+      rethrow;
     }
   }
 
-  static Future<APIResponse> delete(
+  Future<APIResponse> put(
+    String path, {
+    Object? data,
+    bool authorized = true,
+  }) async {
+    try {
+      final headers = await this.headers(authorized: authorized);
+
+      debugPrint('API [PUT]: $apiUrl/$path');
+
+      final response = await dioRetry.retry(
+        () => dio.put(
+          '$apiUrl/$path',
+          data: data,
+          options: Options(headers: headers),
+        ),
+        retryIf: _shouldRetry,
+      );
+
+      return APIResponse.fromResponse(response);
+    } on DioException catch (e) {
+      debugPrint('API [PUT] Error: ${e.message}');
+      if (e.response != null) return APIResponse.fromResponse(e.response!);
+      rethrow;
+    } catch (e) {
+      debugPrint('API [PUT] Unexpected Error: $e');
+      rethrow;
+    }
+  }
+
+  Future<APIResponse> patch(
+    String path, {
+    Object? data,
+    bool authorized = true,
+  }) async {
+    try {
+      final headers = await this.headers(authorized: authorized);
+
+      debugPrint('API [PATCH]: $apiUrl/$path');
+
+      final response = await dioRetry.retry(
+        () => dio.patch(
+          '$apiUrl/$path',
+          data: data,
+          options: Options(headers: headers),
+        ),
+        retryIf: _shouldRetry,
+      );
+
+      return APIResponse.fromResponse(response);
+    } on DioException catch (e) {
+      debugPrint('API [PATCH] Error: ${e.message}');
+      if (e.response != null) return APIResponse.fromResponse(e.response!);
+      rethrow;
+    } catch (e) {
+      debugPrint('API [PATCH] Unexpected Error: $e');
+      rethrow;
+    }
+  }
+
+  Future<APIResponse> delete(
     String path, {
     Map<String, dynamic>? params,
     bool authorized = true,
   }) async {
     try {
-      final Map<String, String> headers =
-          await Api.headers(authorized: authorized);
+      final headers = await this.headers(authorized: authorized);
 
-      debugPrint('delete: $apiUrl/$path');
-      debugPrint('delete: ${_getPostmanBulkEdit(params.toString())}');
+      debugPrint('API [DELETE]: $apiUrl/$path');
 
       final response = await dioRetry.retry(
         () => dio.delete(
           '$apiUrl/$path',
           queryParameters: params,
-          options: Options(
-            headers: headers,
-            receiveTimeout: timeoutDuration,
-            sendTimeout: timeoutDuration,
-          ),
+          options: Options(headers: headers),
         ),
-        retryIf: (e) => toRetry(e),
+        retryIf: _shouldRetry,
       );
 
-      debugPrint(
-          'delete: $path\nstatus: ${response.statusCode}\nres: $response');
-
-      return APIResponse(response: response);
+      return APIResponse.fromResponse(response);
     } on DioException catch (e) {
-      debugPrint('DioException catch (e.error): ${e.error}');
-      debugPrint('DioException catch (e.message): ${e.message}');
-      debugPrint('DioException catch (e.requestOptions): ${e.requestOptions}');
-      debugPrint('DioException catch (e.response): ${e.response}');
-      debugPrint('DioException catch (e.type): ${e.type}');
-      throw (e);
+      debugPrint('API [DELETE] Error: ${e.message}');
+      if (e.response != null) return APIResponse.fromResponse(e.response!);
+      rethrow;
     } catch (e) {
-      debugPrint('API catch (e): $e');
-      throw (e);
+      debugPrint('API [DELETE] Unexpected Error: $e');
+      rethrow;
     }
   }
 }
