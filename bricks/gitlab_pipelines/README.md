@@ -26,7 +26,7 @@ A mason brick to generate the Gitlab Pipelines yml files for CI/CD
 
 1. Setup Gitlab Runner
 2. Add necessary environment variables in **Gitlab CI/CD Settings > Variables**
-3. Upload `key.properties`, `upload-keystore.jks`, `dangerfile.js` files in **Gitlab CI/CD Settings > Secure Files**
+3. Upload `key.properties`, `upload-keystore.jks` files in **Gitlab CI/CD Settings > Secure Files**
 4. Create a group for the Firebase testers
 5. Package name for both iOS and Android should be the same
 
@@ -37,5 +37,27 @@ A mason brick to generate the Gitlab Pipelines yml files for CI/CD
 1. Gitlab Runner Tags to be used
 2. Branch names for the dev, beta, and prod environments
 3. Firebase Testers Group name for Firebase Distribution
+
+## CI/CD Variables Required for Deployments
+
+Set these variables in **Gitlab CI/CD Settings > Variables**:
+
+### Production
+- `PROD_FIREBASE_PROJECT_ID`
+- `PROD_PACKAGE_NAME`
+- `PROD_ANDROID_FIREBASE_APP_ID`
+- `PROD_IOS_FIREBASE_APP_ID`
+
+### Beta
+- `BETA_FIREBASE_PROJECT_ID`
+- `BETA_PACKAGE_NAME`
+- `BETA_ANDROID_FIREBASE_APP_ID`
+- `BETA_IOS_FIREBASE_APP_ID`
+
+### Code Review
+- `CODE_REVIEW`
+- `CODE_REVIEW_DEPS`
+- `GITLAB_TOKEN`
+- `GEMINI_API_KEY`
 
 [1]: https://github.com/felangel/mason

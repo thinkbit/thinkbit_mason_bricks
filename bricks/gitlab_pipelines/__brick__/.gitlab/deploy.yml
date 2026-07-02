@@ -8,19 +8,37 @@ default:
 
 variables:
   FLAVOR: $CI_COMMIT_BRANCH
-  FIREBASE_PROJECT_ID: $firebase_project_id_$CI_COMMIT_BRANCH
-  PACKAGE_NAME: $package_name_$CI_COMMIT_BRANCH
-  ANDROID_FIREBASE_APP_ID: $android_firebase_app_id_$CI_COMMIT_BRANCH
-  IOS_FIREBASE_APP_ID: $ios_firebase_app_id_$CI_COMMIT_BRANCH
 
 stages:
   - Build
   - Distribution
 
+.resolve-deploy-vars: &resolve-deploy-vars |
+  if [ "$CI_COMMIT_BRANCH" = "{{prod_branch}}" ]; then
+    export FIREBASE_PROJECT_ID="$PROD_FIREBASE_PROJECT_ID"
+    export PACKAGE_NAME="$PROD_PACKAGE_NAME"
+    export ANDROID_FIREBASE_APP_ID="$PROD_ANDROID_FIREBASE_APP_ID"
+    export IOS_FIREBASE_APP_ID="$PROD_IOS_FIREBASE_APP_ID"
+  elif [ "$CI_COMMIT_BRANCH" = "{{beta_branch}}" ]; then
+    export FIREBASE_PROJECT_ID="$BETA_FIREBASE_PROJECT_ID"
+    export PACKAGE_NAME="$BETA_PACKAGE_NAME"
+    export ANDROID_FIREBASE_APP_ID="$BETA_ANDROID_FIREBASE_APP_ID"
+    export IOS_FIREBASE_APP_ID="$BETA_IOS_FIREBASE_APP_ID"
+  else
+    echo "Unsupported deploy branch: $CI_COMMIT_BRANCH"
+    exit 1
+  fi
+
+  if [ -z "$FIREBASE_PROJECT_ID" ] || [ -z "$PACKAGE_NAME" ] || [ -z "$ANDROID_FIREBASE_APP_ID" ] || [ -z "$IOS_FIREBASE_APP_ID" ]; then
+    echo "Missing deploy CI/CD variables for $CI_COMMIT_BRANCH"
+    exit 1
+  fi
+
 .setup-flutterfire: &setup-flutterfire
+  - *resolve-deploy-vars
   - fvm dart pub global activate flutterfire_cli
   - export PATH="$PATH":"$HOME/.pub-cache/bin"
-  - rm ios/Runner/GoogleService-Info.plist
+  - rm -f ios/Runner/GoogleService-Info.plist
   - fvm exec flutterfire configure --project=$FIREBASE_PROJECT_ID --platforms android,ios -a $PACKAGE_NAME -i $PACKAGE_NAME -y --token $FIREBASE_TOKEN
 
 Build APK:
@@ -61,6 +79,7 @@ Build IPA:
 Firebase Dist.:
   stage: Distribution
   script:
+    - *resolve-deploy-vars
     - OUTPUT=$(git log --grep="^feat:" --pretty=format:"%s")
     - echo $OUTPUT
     - firebase appdistribution:distribute build/app/outputs/flutter-apk/app-$FLAVOR-release.apk --app $ANDROID_FIREBASE_APP_ID --release-notes "$OUTPUT" --groups "{{firebase_group}}" --token $FIREBASE_TOKEN
