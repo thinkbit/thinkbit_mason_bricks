@@ -15,7 +15,8 @@ class Validator {
       final min = double.parse(minMax[0]);
       final max = double.parse(minMax[1]);
 
-      if (_rules['min']!(text, min.toString()) is String || _rules['max']!(text, max.toString()) is String) {
+      if (_rules['min']!(text, min.toString()) is String ||
+          _rules['max']!(text, max.toString()) is String) {
         return 'This must be between $min and $max.';
       }
 
@@ -50,7 +51,8 @@ class Validator {
     'min': (String text, String value) {
       if (text.isEmpty) return null;
 
-      if (text.length < double.parse(value)) return 'This must be at least $value characters.';
+      if (text.length < double.parse(value))
+        return 'This must be at least $value characters.';
 
       return true;
     },
@@ -60,7 +62,8 @@ class Validator {
     'max': (String text, String value) {
       if (text.isEmpty) return null;
 
-      if (double.parse(value) < text.length) return 'Max of $value characters only';
+      if (double.parse(value) < text.length)
+        return 'Max of $value characters only';
 
       return true;
     },
@@ -116,16 +119,25 @@ class Validator {
   /// Validates a [text] input based on a list of [rules]
   ///
   static String? validate({String? text, List<String>? rules}) {
-    for (final rule in rules!) {
+    final value = text ?? '';
+    final activeRules = rules ?? const <String>[];
+
+    for (final rule in activeRules) {
       dynamic error;
       final ruleComponents = rule.split(':');
+      final ruleName = ruleComponents[0];
+      final validator = Validator._rules[ruleName];
+
+      if (validator == null) {
+        return 'Invalid validation rule: $ruleName.';
+      }
 
       if (ruleComponents.length == 1) {
-        error = Validator._rules[ruleComponents[0]]!(text);
+        error = validator(value);
       } else if (ruleComponents.length == 2) {
-        error = Validator._rules[ruleComponents[0]]!(text, ruleComponents[1]);
+        error = validator(value, ruleComponents[1]);
       } else {
-        assert(false, 'Invalid rule.');
+        return 'Invalid validation rule: $rule.';
       }
 
       if (error is String) return error;

@@ -18,6 +18,7 @@ class Api {
   static Duration timeoutDuration = const Duration(minutes: 1);
 
   static final dioRetry = RetryOptions(maxAttempts: 3);
+  static FutureOr<String?> Function()? tokenProvider;
 
   static Dio dio = Dio(
     BaseOptions(
@@ -26,12 +27,15 @@ class Api {
       receiveTimeout: timeoutDuration,
       validateStatus: (statusCode) {
         if (statusCode == null) return false;
-        
+
         // Return true for common error codes so we can parse the response body
-        if (statusCode == 422 || statusCode == 401 || statusCode == 400 || statusCode == 404) {
+        if (statusCode == 422 ||
+            statusCode == 401 ||
+            statusCode == 400 ||
+            statusCode == 404) {
           return true;
         }
-        
+
         return statusCode >= 200 && statusCode < 300;
       },
     ),
@@ -44,11 +48,9 @@ class Api {
     };
 
     if (authorized) {
-      // TODO: Replace with your actual token retrieval logic
-      String? token = 'auth token here';
-      debugPrint('authToken: $token');
+      final token = await tokenProvider?.call();
 
-      if (token != null) {
+      if (token != null && token.isNotEmpty) {
         headers['Authorization'] = 'Bearer $token';
       }
     }
@@ -81,10 +83,7 @@ class Api {
         () => dio.get(
           '$apiUrl/$path',
           queryParameters: params,
-          options: Options(
-            headers: headers,
-            responseType: responseType,
-          ),
+          options: Options(headers: headers, responseType: responseType),
         ),
         retryIf: _shouldRetry,
       );

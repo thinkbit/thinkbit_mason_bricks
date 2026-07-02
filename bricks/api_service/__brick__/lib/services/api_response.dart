@@ -14,19 +14,19 @@ class APIResponse {
 
   /// Factory constructor to create an [APIResponse] from a Dio [Response].
   factory APIResponse.fromResponse(Response<dynamic> response) {
-    final status = APIStatusHandler.parseStatusCode(statusCode: response.statusCode);
+    final status = APIStatusHandler.parseStatusCode(
+      statusCode: response.statusCode,
+    );
     String? error;
-    
-    if (status != ResponseStatus.success && response.data is Map<String, dynamic>) {
-       error = APIExceptionMessageHandler.parseResponseBody(
-        result: response.data as Map<String, dynamic>);
+
+    if (status != ResponseStatus.success &&
+        response.data is Map<String, dynamic>) {
+      error = APIExceptionMessageHandler.parseResponseBody(
+        result: response.data as Map<String, dynamic>,
+      );
     }
 
-    return APIResponse(
-      response: response,
-      errorMessage: error,
-      status: status,
-    );
+    return APIResponse(response: response, errorMessage: error, status: status);
   }
 
   /// Helper to get the response data.
@@ -58,8 +58,10 @@ class APIStatusHandler {
       return ResponseStatus.unauthorized;
     } else if (statusCode == 404) {
       return ResponseStatus.notFound;
-    } else if (statusCode < 200 || statusCode >= 400) {
+    } else if (statusCode == 403) {
       return ResponseStatus.forbidden;
+    } else if (statusCode < 200 || statusCode >= 400) {
+      return ResponseStatus.error;
     } else {
       return ResponseStatus.error;
     }
