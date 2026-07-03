@@ -35,6 +35,14 @@ if (response.isSuccess()) {
 
 For larger apps, it's best to wrap the API calls in a repository:
 
+Before making authorized requests, configure how the API service should read the current token:
+
+```dart
+Api.tokenProvider = () async {
+  return secureStorage.read(key: 'auth_token');
+};
+```
+
 **Repository Implementation:**
 ```dart
 class AuthRepository {
