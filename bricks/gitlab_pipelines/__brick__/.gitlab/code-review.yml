@@ -18,9 +18,9 @@ Reviewer:
     - npm -v
     # - echo "Downloading Secure Files..."
     # - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    - echo "Creating code review files from CI/CD variables..."
-    - printf '%s' "$CODE_REVIEW" > danger.js
-    - printf '%s' "$CODE_REVIEW_DEPS" > package.json
+    - echo "Copying code review files from CI/CD file variables..."
+    - cp "$CODE_REVIEW" danger.js
+    - cp "$CODE_REVIEW_DEPS" package.json
     - echo "Installing project dependencies...."
     - npm install
   script:
