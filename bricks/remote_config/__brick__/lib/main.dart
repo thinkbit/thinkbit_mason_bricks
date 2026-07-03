@@ -1,11 +1,13 @@
 import 'dart:async';
 
-import 'package:consumer/app/services/remote_config_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+
+import 'app/services/remote_config_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize the Remote Config service (call this after Firebase.initializeApp())
+  await Firebase.initializeApp();
   await RemoteConfigService.instance.initialize();
 
   runApp(const MyApp());
@@ -51,26 +53,23 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final isFeatureEnabled = _remoteConfigService.getBool(
-      rcIsFeatureEnabled,
-    );
-    return Scaffold(
-      body: Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(32),
-        child: _isAppMaintenance
-            ? const MaintenancePage()
-            : HomePage(isNewFeatureEnabled: isFeatureEnabled),
+    final isFeatureEnabled = _remoteConfigService.getBool(rcIsFeatureEnabled);
+    return MaterialApp(
+      home: Scaffold(
+        body: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(32),
+          child: _isAppMaintenance
+              ? const MaintenancePage()
+              : HomePage(isNewFeatureEnabled: isFeatureEnabled),
+        ),
       ),
     );
   }
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({
-    required this.isNewFeatureEnabled,
-    super.key,
-  });
+  const HomePage({required this.isNewFeatureEnabled, super.key});
 
   final bool isNewFeatureEnabled;
 
@@ -81,10 +80,7 @@ class HomePage extends StatelessWidget {
       children: [
         const Text(
           'Home Page',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 32),
         ElevatedButton(
@@ -109,16 +105,10 @@ class MaintenancePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 32,
       children: [
-        Icon(
-          Icons.construction,
-          size: 48,
-        ),
+        Icon(Icons.construction, size: 48),
         Text(
           'Under Maintenance',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ],
     );
