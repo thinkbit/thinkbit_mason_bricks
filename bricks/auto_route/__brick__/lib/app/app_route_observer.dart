@@ -2,8 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'router/app_router.gr.dart';
 
 class AppRouteObserver extends AutoRouterObserver {
   @override
@@ -18,7 +16,7 @@ class AppRouteObserver extends AutoRouterObserver {
 
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
-    if (newRoute == null) return;
+    if (newRoute == null || newRoute.data == null) return;
 
     debugPrint('AppRouteObserver didReplace: ${newRoute.data!.name}');
 
@@ -28,13 +26,15 @@ class AppRouteObserver extends AutoRouterObserver {
 
   @override
   void didRemove(Route route, Route? previousRoute) {
-    if (previousRoute == null) return;
+    if (previousRoute == null || previousRoute.data == null) return;
 
     debugPrint('AppRouteObserver didRemove: ${previousRoute.data!.name}');
 
     if (!kIsWeb)
-      FirebaseCrashlytics.instance
-          .setCustomKey('route', previousRoute.data!.name);
+      FirebaseCrashlytics.instance.setCustomKey(
+        'route',
+        previousRoute.data!.name,
+      );
   }
 
   @override
@@ -44,7 +44,9 @@ class AppRouteObserver extends AutoRouterObserver {
     debugPrint('AppRouteObserver didPop: ${previousRoute.data!.name}');
 
     if (!kIsWeb)
-      FirebaseCrashlytics.instance
-          .setCustomKey('route', previousRoute.data!.name);
+      FirebaseCrashlytics.instance.setCustomKey(
+        'route',
+        previousRoute.data!.name,
+      );
   }
 }
