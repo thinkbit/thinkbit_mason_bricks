@@ -5,7 +5,7 @@ class PusherService {
   factory PusherService() => _instance;
   PusherService._internal();
 
-  late PusherChannelsClient pusher;
+  PusherChannelsClient? _pusher;
 
   static final PusherService _instance = PusherService._internal();
 
@@ -15,12 +15,18 @@ class PusherService {
   static final int _port = 6001;
 
   static final String _baseUrl = 'http://localhost:8000';
-  static final Uri _authEndpoint = Uri.parse('$_baseUrl/api/admin/broadcasting/auth');
+  static final Uri _authEndpoint = Uri.parse(
+    '$_baseUrl/api/admin/broadcasting/auth',
+  );
 
   static Map<String, String> _authHeaders(String token) {
-    return {
-      'Authorization': 'Bearer $token',
-    };
+    return {'Authorization': 'Bearer $token'};
+  }
+
+  PusherChannelsClient? get _activePusher {
+    final client = _pusher;
+    if (client == null || client.isDisposed) return null;
+    return client;
   }
 
   Future<void> init() async {
@@ -33,25 +39,22 @@ class PusherService {
       port: _port,
     );
 
-    pusher = PusherChannelsClient.websocket(
+    final client = PusherChannelsClient.websocket(
       options: hostOptions,
       connectionErrorHandler: (exception, trace, refresh) async {
         debugPrint('Error connecting to pusher: $exception');
         refresh();
-        await pusher.reconnect();
+        await _activePusher?.reconnect();
       },
     );
+    _pusher = client;
 
     debugPrint('Connecting to pusher...');
 
     try {
-      await pusher.connect();
-
-      await pusher.connect().whenComplete(
-        () {
-          debugPrint('Connected to pusher');
-        },
-      );
+      await client.connect().whenComplete(() {
+        debugPrint('Connected to pusher');
+      });
     } on PusherChannelsClientDisposedException catch (e) {
       debugPrint('Pusher client was disposed: $e');
     } catch (e) {
@@ -64,8 +67,9 @@ class PusherService {
     String eventName,
     void Function(ChannelReadEvent) onEvent,
   ) {
-    if (pusher.isDisposed) return null;
-    final channel = pusher.publicChannel(
+    final client = _activePusher;
+    if (client == null) return null;
+    final channel = client.publicChannel(
       channelName,
       forceCreateNewInstance: true,
     );
@@ -87,15 +91,18 @@ class PusherService {
   Future<PrivateChannel?> subscribeToPrivate(
     String channelName,
     String eventName,
-    void Function(ChannelReadEvent) onEvent,
-  ) async {
-    if (pusher.isDisposed) return null;
-    final channel = pusher.privateChannel(
+    void Function(ChannelReadEvent) onEvent, {
+    required String token,
+  }) async {
+    final client = _activePusher;
+    if (client == null) return null;
+    final channel = client.privateChannel(
       channelName,
-      authorizationDelegate: EndpointAuthorizableChannelTokenAuthorizationDelegate.forPrivateChannel(
-        authorizationEndpoint: _authEndpoint,
-        headers: _authHeaders('token'),
-      ),
+      authorizationDelegate:
+          EndpointAuthorizableChannelTokenAuthorizationDelegate.forPrivateChannel(
+            authorizationEndpoint: _authEndpoint,
+            headers: _authHeaders(token),
+          ),
       forceCreateNewInstance: true,
     );
 
@@ -115,17 +122,20 @@ class PusherService {
 
   Future<PresenceChannel?> subscribeToPresence(
     String channelName, {
+    required String token,
     required void Function(ChannelReadEvent) onSubscribed,
     required void Function(ChannelReadEvent) onMemberAdded,
     required void Function(ChannelReadEvent) onMemberRemoved,
   }) async {
-    if (pusher.isDisposed) return null;
-    final presence = pusher.presenceChannel(
+    final client = _activePusher;
+    if (client == null) return null;
+    final presence = client.presenceChannel(
       'presence-$channelName',
-      authorizationDelegate: EndpointAuthorizableChannelTokenAuthorizationDelegate.forPresenceChannel(
-        authorizationEndpoint: _authEndpoint,
-        headers: _authHeaders('token'),
-      ),
+      authorizationDelegate:
+          EndpointAuthorizableChannelTokenAuthorizationDelegate.forPresenceChannel(
+            authorizationEndpoint: _authEndpoint,
+            headers: _authHeaders(token),
+          ),
       forceCreateNewInstance: true,
     )..subscribe();
 
@@ -171,8 +181,9 @@ class PusherService {
   }
 
   void dispose() {
-    if (pusher.isDisposed) return;
-    pusher.dispose();
+    final client = _activePusher;
+    if (client == null) return;
+    client.dispose();
     debugPrint('Disposed pusher');
   }
 }

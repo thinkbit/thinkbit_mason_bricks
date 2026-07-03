@@ -79,6 +79,7 @@ final privateChannel = await PusherService().subscribeToPrivate(
   'private-chat',
   'message.sent',
   (event) => print('New message: ${event.data}'),
+  token: authToken,
 );
 ```
 
@@ -88,6 +89,7 @@ final privateChannel = await PusherService().subscribeToPrivate(
 // Subscribe to presence channel
 final presenceChannel = await PusherService().subscribeToPresence(
   'room-1',
+  token: authToken,
   onSubscribed: (event) => print('Joined: ${event.data}'),
   onMemberAdded: (event) => print('Member joined: ${event.data}'),
   onMemberRemoved: (event) => print('Member left: ${event.data}'),
